@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+    <script src="language-switch.js"></script>
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>-->
+    <script src="https://js.arcgis.com/4.30/"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <title>BetSpot </title>
+
+</head>
+<body>
+
+
+
+<!-- Header section -->
+<header>
+    <div class="top-header">
+        <div class="logo">
+            <a href="index.html">
+                <img src="logo/betspot.png" alt="Company Logo" width="200">
+            </a>
+        </div>
+        <div class="language buttons">
+            <button><img src="flags/mk.png" alt="Macedonian" width="20" height="15"></button>
+            <button><img src="flags/en.png" alt="English" width="20" height="15"></button>
+            <button><img src="flags/al.png" alt="Albanian" width="20" height="15"></button>
+        </div>
+    </div>
+    <div class="bottom-header">
+        <nav class="action buttons">
+            <a href="index.html">Home</a>
+            <a href="video.html">Video</a>
+            <a href="contact_page.html">Contact</a>
+        </nav>
+    </div>
+</header>
+
+<!-- Map Content Section -->
+<main>
+    <!-- Map Section -->
+
+        <div id="map" style="width: 100%; height: 600px;"></div>
+
+
+
+    <!-- Search and table section -->
+    <section class="search-table">
+        <div class="search-gallery-container">
+            <div class="search-container">
+                <input type="text" placeholder="Search..." class="search-bar">
+                <button class="search-button">Search</button>
+            </div>
+            <button class="gallery-button">Gallery</button>
+            <!-- Gallery Popup -->
+            <div id="galleryPopup" class="popup hidden">
+                <div class="popup-content">
+                    <span id="closePopup" class="close-button">&times;</span>
+                    <div id="photoGallery" class="gallery-container">
+                        <!-- Photos will be dynamically loaded here -->
+                    </div>
+                    <div class="gallery-navigation">
+                        <button id="prevPhoto" class="nav-button"> ❮ </button>
+                        <button id="nextPhoto" class="nav-button"> ❯ </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <table>
+
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Address</th>
+            </tr>
+
+            <tbody id="tableBody">
+            <!-- Rows for dynamic table -->
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button id="prevButton">Previous</button>
+            <span id="pageNumbers">Page 1</span>
+            <button id="nextButton">Next</button>
+        </div>
+    </section>
+    <!-- Export Buttons -->
+    <div class="export-buttons">
+        <button id="exportPDF">Export to PDF</button>
+        <button id="exportExcel">Export to Excel</button>
+    </div>
+</main>
+
+<!-- Footer Section -->
+<footer>
+    <p>&copy; 2024 Company. All Rights Reserved.</p>
+</footer>
+
+
+<script>
+
+
+    require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/Graphic",
+        "esri/layers/FeatureLayer",
+        "esri/geometry/support/webMercatorUtils",
+        "esri/rest/support/Query"
+    ], function(Map, MapView, Graphic, FeatureLayer, webMercatorUtils,Query) {
+        //Configuration
+
+
+
+        const map = new Map({
+            basemap: "streets-vector"
+        });
+
+        //Create map view
+        const view =new MapView({
+
+                container: "map",
+                map: map,
+                center: [21.4254, 41.9981], // Longitude, latitude
+                zoom: 13
+
+        });
+
+        //Add feature layer to map
+
+            const featureLayer = new FeatureLayer({
+                url: "https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1"
+            });
+            map.add(featureLayer);
+
+
+        // const query = new Query({
+        //     outFields: ["*"],
+        //     where: "1=1"
+        // });
+        // //filling in the table
+        // featureLayer.queryFeatures(query)
+        //     .then(function (response){
+        //         var resultFeatures = response.features;
+        //         console.log("result", resultFeatures);
+        //     for (var i = 0; i < resultFeatures.length; i++) {
+        //         // var feature = response.features[i];
+        //         // Check if feature and feature.attributes exist before accessing their properties
+        //         var row = "<tr><td>" + response.features[i].attributes.objectid + "</td><td>" + response.features[i].attributes.ime + "</td><td>" + response.features[i].attributes.adresa + "</td></tr>";
+        //         $("#tableBody").append(row);
+        //         // Handle click event on table rows
+        //         console.log("row",row);
+        //     }
+        // });
+
+        const ROWS_PER_PAGE = 10;
+        let currentPage = 1;
+        let totalRows = 0;
+
+        function fetchPage(page){
+            const offset=(page-1)*ROWS_PER_PAGE;
+
+            const query = new Query({
+                outFields: ["*"],
+                where: "1=1",
+                resultOffset: offset,
+                resultRecordCount: ROWS_PER_PAGE
+            });
+
+            featureLayer.queryFeatures(query).then(function (response){
+                const resultFeatures= response.features;
+
+                $("#tableBody").empty();
+
+                resultFeatures.forEach(function (feature){
+                    const row= `<tr>
+                    <td>${feature.attributes.objectId}</td>
+                    <td>${feature.attributes.ime}</td>
+                    <td>${feature.attributes.adresa}</td>
+                    </tr>`;
+                    $("#tableBody").append(row);
+                });
+            })
+        }
+
+
+    });
+
+   </script>
+
+</body>
+</html>

@@ -1,0 +1,296 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #eae6de;
+}
+
+/*Header styles*/
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #157759;
+    color: white;
+}
+
+.bottom-header {
+    display: flex;
+    padding: 10px;
+    background-color: #1e9b75;
+    color: white;
+}
+
+.buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.buttons a {
+    display: inline-block;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.buttons a:hover {
+    background-color: #004d33;
+}
+
+header .language button {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.main-content {
+    padding: 20px;
+}
+
+.map {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.map-area {
+    width: 100%;
+    height: 600px;
+    border: 1px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-gallery-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-container {
+    display: flex;
+    gap: 10px;
+}
+
+.search-bar {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.search-button {
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #157759;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+    background-color: #004d33;
+}
+
+.gallery-button {
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #157759;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.gallery-button:hover {
+    background-color: #004d33;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+table th:nth-child(1), table td:nth-child(1) {
+    width: 20%; /* ID column width */
+}
+
+table th:nth-child(2), table td:nth-child(2),
+table th:nth-child(3), table td:nth-child(3) {
+    width: 40%; /* Name and Address columns width */
+}
+
+
+th {
+    background-color: #f4f4f4;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.pagination button {
+    background-color: #1e9b75;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+    background-color: #157759;
+}
+
+.pagination button.active {
+    background-color: #157759;
+    font-weight: bold;
+}
+
+.pagination button:disabled {
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+}
+
+.pagination button.page-button {
+    margin: 0 1px;
+}
+
+table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+table tbody tr.selected {
+    background-color: #1e9b75;
+    color: white;
+}
+
+table tbody tr.selected:hover {
+    background-color: #157759;
+}
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    background-color: #eae6de;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    z-index: 1000;
+    border-radius: 8px;
+}
+
+.popup-content {
+    position: relative;
+}
+
+.hidden {
+    display: none;
+}
+
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.gallery-container img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.gallery-navigation {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+    gap: 15px;
+}
+
+.nav-button {
+    background-color: #157759;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.nav-button:hover {
+    background-color: #157759;
+}
+
+.export-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    gap: 15px;
+    margin-right : 15px;
+}
+
+.export-buttons button {
+    padding: 6px 12px;
+    font-size: 14px;
+    background-color: #1e9b75;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.export-buttons button:hover {
+    background-color: #157759;
+}
+
+
+footer {
+    text-align: center;
+    padding: 10px 20px;
+    background-color: #157759;
+    color: #fff;
+    margin-top: 40px;
+}

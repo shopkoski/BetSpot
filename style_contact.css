@@ -1,0 +1,136 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #eae6de;
+}
+
+/* Header Styles */
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #157759;
+    color: white;
+}
+
+.bottom-header {
+    display: flex;
+    padding: 10px;
+    background-color: #1e9b75;
+    color: white;
+}
+
+.buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.buttons a {
+    display: inline-block;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.buttons a:hover {
+    background-color: #004d33;
+}
+
+header .language button {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+/* Contact Page Container */
+.contact-page {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.contact-page h1 {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+hr {
+    border: 1px solid white;
+    margin-bottom: 20px;
+}
+
+/* Contact Content Layout */
+.contact-content {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Form Section Styling */
+.form-section {
+    flex: 1;
+    min-width: 300px;
+}
+
+.form-section h2 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.form-section p {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+form input,
+form textarea {
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+form button {
+    padding: 10px;
+    background-color: #157759;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+form button:hover {
+    background-color: #004d33;
+}
+
+/* Footer Section */
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #157759;
+    color: #fff;
+    margin-top: 40px;
+}
