@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="language-switch.js"></script>
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>-->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>-->
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/jspdf-autotable@latest/dist/jspdf.plugin.autotable.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://js.arcgis.com/4.30/"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <title>BetSpot </title>
-
 </head>
 <body>
 
@@ -33,9 +34,9 @@
     </div>
     <div class="bottom-header">
         <nav class="action buttons">
-            <a href="index.html">Home</a>
-            <a href="video.html">Video</a>
-            <a href="contact_page.html">Contact</a>
+            <a href="index.html" data-key="home">Home</a>
+            <a href="video.html" data-key="video">Video</a>
+            <a href="contact_page.html" data-key="contact">Contact</a>
         </nav>
     </div>
 </header>
@@ -44,7 +45,7 @@
 <main>
     <!-- Map Section -->
 
-        <div id="map" style="width: 100%; height: 600px;"></div>
+    <div id="map" style="width: 100%; height: 600px;"></div>
 
 
 
@@ -52,10 +53,10 @@
     <section class="search-table">
         <div class="search-gallery-container">
             <div class="search-container">
-                <input type="text" placeholder="Search..." class="search-bar">
-                <button class="search-button">Search</button>
+                <input type="text" class="search-bar" data-key="search_placeholder" placeholder="Search...">
+                <button class="search-button" data-key="search"><i class="fas fa-search"></i> Search</button>
             </div>
-            <button class="gallery-button">Gallery</button>
+            <button class="gallery-button" data-key="gallery"><i class="fas fa-camera"></i> Gallery</button>
             <!-- Gallery Popup -->
             <div id="galleryPopup" class="popup hidden">
                 <div class="popup-content">
@@ -64,8 +65,16 @@
                         <!-- Photos will be dynamically loaded here -->
                     </div>
                     <div class="gallery-navigation">
-                        <button id="prevPhoto" class="nav-button"> ❮ </button>
-                        <button id="nextPhoto" class="nav-button"> ❯ </button>
+                        <button id="prevPhoto" class="nav-button" aria-label="Previous">
+                            <svg id="prevArrow" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"/>
+                            </svg>
+                        </button>
+                        <button id="nextPhoto" class="nav-button" aria-label="Next">
+                            <svg id="nextArrow" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 6 15 12 9 18"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -74,9 +83,9 @@
         <table>
 
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Address</th>
+                <th><span class="table-header" data-key="table_id">ID</span> <button class="sort-btn" data-column="id">↕</button></th>
+                <th><span class="table-header" data-key="table_name">Name</span> <button class="sort-btn" data-column="name">↕</button></th>
+                <th><span class="table-header" data-key="table_address">Address</span></th>
             </tr>
 
             <tbody id="tableBody">
@@ -84,114 +93,828 @@
             </tbody>
         </table>
         <div class="pagination">
-            <button id="prevButton">Previous</button>
+            <button id="prevButton" data-key="previous">Previous</button>
             <span id="pageNumbers">Page 1</span>
-            <button id="nextButton">Next</button>
+            <button id="nextButton" data-key="next">Next</button>
         </div>
     </section>
     <!-- Export Buttons -->
     <div class="export-buttons">
-        <button id="exportPDF">Export to PDF</button>
-        <button id="exportExcel">Export to Excel</button>
+        <button id="exportPDF" data-key="export_pdf">Export to PDF</button>
+        <button id="exportExcel" data-key="export_excel">Export to Excel</button>
     </div>
 </main>
 
 <!-- Footer Section -->
 <footer>
-    <p>&copy; 2024 Company. All Rights Reserved.</p>
+    <div class="footer-content">
+        <p>&copy; 2024 Company. All Rights Reserved.</p>
+        <div class="footer-icons">
+            <a href="https://www.linkedin.com/in/goce-shopkoski-315998176/" target="_blank" rel="noopener" aria-label="LinkedIn">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="24" height="24" rx="4" fill="#0A66C2"/>
+                    <path d="M7.5 8.5C8.32843 8.5 9 7.82843 9 7C9 6.17157 8.32843 5.5 7.5 5.5C6.67157 5.5 6 6.17157 6 7C6 7.82843 6.67157 8.5 7.5 8.5Z" fill="white"/>
+                    <rect x="6" y="10" width="3" height="8" rx="1.5" fill="white"/>
+                    <path d="M12 10H14.5C16.1569 10 17.5 11.3431 17.5 13V18H15V13.5C15 13.2239 14.7761 13 14.5 13C14.2239 13 14 13.2239 14 13.5V18H12V10Z" fill="white"/>
+                </svg>
+            </a>
+            <a href="https://www.instagram.com/_shopkoskig/" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="24" height="24" rx="4" fill="#E1306C"/>
+                    <path d="M12 8.5C10.067 8.5 8.5 10.067 8.5 12C8.5 13.933 10.067 15.5 12 15.5C13.933 15.5 15.5 13.933 15.5 12C15.5 10.067 13.933 8.5 12 8.5ZM12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14Z" fill="white"/>
+                    <circle cx="16.5" cy="7.5" r="1.5" fill="white"/>
+                </svg>
+            </a>
+        </div>
+    </div>
 </footer>
 
 
 <script>
-
-
     require([
         "esri/Map",
         "esri/views/MapView",
         "esri/Graphic",
         "esri/layers/FeatureLayer",
         "esri/geometry/support/webMercatorUtils",
-        "esri/rest/support/Query"
-    ], function(Map, MapView, Graphic, FeatureLayer, webMercatorUtils,Query) {
-        //Configuration
+        "esri/rest/support/Query",
+        "esri/widgets/Search",
+        "esri/widgets/Expand",
+        "esri/widgets/BasemapGallery",
+        "esri/widgets/LayerList",
+        "esri/widgets/Measurement",
+        "esri/widgets/Bookmarks",
+        "esri/widgets/Home",
+        "esri/widgets/Fullscreen",
+        "esri/widgets/Legend",
+        "esri/widgets/Sketch",
+        "esri/layers/GraphicsLayer",
+        "esri/widgets/CoordinateConversion",
+        "esri/widgets/Print",
+        "esri/widgets/ElevationProfile",
+        "esri/widgets/Locate",
+        "esri/config"
+    ], function(Map, MapView, Graphic, FeatureLayer, webMercatorUtils, ArcGISQuery, Search, Expand, BasemapGallery, LayerList, Measurement, Bookmarks, Home, Fullscreen, Legend, Sketch, GraphicsLayer, CoordinateConversion, Print, ElevationProfile, Locate, esriConfig) {
+        // Set locale from localStorage or default to 'en'
+        var lang = localStorage.getItem('selectedLanguage') || 'en';
+        // Map 'al' (used in your UI) to 'sq' (ArcGIS locale for Albanian)
+        if (lang === 'al') lang = 'sq';
+        esriConfig.locale = lang;
 
-
-
+        // Configuration
         const map = new Map({
             basemap: "streets-vector"
         });
 
         //Create map view
-        const view =new MapView({
+        const view = new MapView({
+            container: "map",
+            map: map,
+            center: [21.4254, 41.9981], // Longitude, latitude
+            zoom: 13.5// Set closer zoom so feature layer is visible right away
+        });
 
-                container: "map",
-                map: map,
-                center: [21.4254, 41.9981], // Longitude, latitude
-                zoom: 13
+        // Add the Search widget
+        const searchWidget = new Search({
+            view: view
+        });
+        const searchExpand = new Expand({
+            view: view,
+            content: searchWidget,
+            expanded: false // Minimized by default
+        });
+        view.ui.add(searchExpand, {
+            position: "top-left",
+            index: 2
+        });
 
+        // Listen for expand/collapse events on the searchExpand widget
+        searchExpand.watch("expanded", function(isExpanded) {
+            if (isExpanded) {
+                // Call updateUI to apply translations after the widget expands
+                setTimeout(updateUI, 100);
+            }
+        });
+
+        // Add the BasemapGallery widget (wrapped in Expand, minimized by default) below the Search widget
+        const basemapGallery = new BasemapGallery({
+            view: view
+        });
+        const basemapExpand = new Expand({
+            view: view,
+            content: basemapGallery,
+            expanded: false // Minimized by default
+        });
+        view.ui.add(basemapExpand, {
+            position: "top-left",
+            index: 3
+        });
+
+        // Add the LayerList widget (wrapped in Expand, minimized by default) below the BasemapGallery widget
+        const layerList = new LayerList({
+            view: view
+        });
+        const layerListExpand = new Expand({
+            view: view,
+            content: layerList,
+            expanded: false // Minimized by default
+        });
+        view.ui.add(layerListExpand, {
+            position: "top-left",
+            index: 4
+        });
+
+        // Add the Measurement widget (wrapped in Expand, minimized by default) below the LayerList widget
+        const measurement = new Measurement({
+            view: view
+        });
+        const measurementExpand = new Expand({
+            view: view,
+            content: measurement,
+            expanded: false
+        });
+        view.ui.add(measurementExpand, {
+            position: "top-left",
+            index: 5
+        });
+
+        // Listen for expand/collapse events on the measurementExpand widget
+        measurementExpand.watch("expanded", function(isExpanded) {
+            if (isExpanded) {
+                setTimeout(() => {
+                    const measurementWidgetNode = measurementExpand.container.querySelector('.esri-measurement');
+                    if (measurementWidgetNode && !measurementWidgetNode.querySelector('.custom-measure-buttons')) {
+                        // Create a container for the buttons
+                        const toolButtonsDiv = document.createElement('div');
+                        toolButtonsDiv.className = 'custom-measure-buttons';
+                        toolButtonsDiv.style.display = 'flex';
+                        toolButtonsDiv.style.flexDirection = 'column';
+                        toolButtonsDiv.style.alignItems = 'stretch';
+                        toolButtonsDiv.style.gap = '4px';
+                        toolButtonsDiv.style.marginBottom = '8px';
+
+                        // Optional: Add a label
+                        const label = document.createElement('div');
+                        // Apply translation to the label
+                        label.textContent = translations[currentLanguage]['startMeasurement'] || translations['en']['startMeasurement'];
+                        label.style.fontSize = '12px';
+                        label.style.marginBottom = '4px';
+                        label.style.color = '#333';
+                        toolButtonsDiv.appendChild(label);
+
+                        // Create Distance button
+                        const distanceBtn = document.createElement('button');
+                        // Apply translation to the button text
+                        const distanceIcon = '📏 '; // Keep the icon
+                        distanceBtn.textContent = distanceIcon + (translations[currentLanguage]['distance'] || translations['en']['distance']);
+                        distanceBtn.className = 'esri-widget--button';
+                        distanceBtn.style.fontSize = '12px';
+                        distanceBtn.style.padding = '4px 8px';
+                        distanceBtn.onclick = () => {
+                            measurement.clear(); // Clear any existing measurements
+                            measurement.activeTool = 'direct-line'; // Changed from 'distance' to 'direct-line'
+                            measurement.start();
+                        };
+
+                        // Create Area button
+                        const areaBtn = document.createElement('button');
+                        // Apply translation to the button text
+                        const areaIcon = '⬛ '; // Keep the icon
+                        areaBtn.textContent = areaIcon + (translations[currentLanguage]['area'] || translations['en']['area']);
+                        areaBtn.className = 'esri-widget--button';
+                        areaBtn.style.fontSize = '12px';
+                        areaBtn.style.padding = '4px 8px';
+                        areaBtn.onclick = () => {
+                            measurement.activeTool = 'area';
+                            measurement.start();
+                        };
+
+                        toolButtonsDiv.appendChild(distanceBtn);
+                        toolButtonsDiv.appendChild(areaBtn);
+
+                        // Add clear button
+                        const clearBtn = document.createElement('button');
+                        // Apply translation to the button text
+                        const clearIcon = '🗑️ '; // Keep the icon
+                        clearBtn.textContent = clearIcon + (translations[currentLanguage]['clear'] || translations['en']['clear']);
+                        clearBtn.className = 'esri-widget--button';
+                        clearBtn.style.fontSize = '12px';
+                        clearBtn.style.padding = '4px 8px';
+                        clearBtn.style.marginTop = '8px';
+                        clearBtn.onclick = () => {
+                            measurement.clear();
+                        };
+                        toolButtonsDiv.appendChild(clearBtn);
+
+                        // Insert the buttons at the top of the widget
+                        measurementWidgetNode.insertBefore(toolButtonsDiv, measurementWidgetNode.firstChild);
+
+                        // Call the specific translation function for measurement buttons after they are created
+                        translateMeasurementButtons();
+                    }
+                }, 100);
+            }
+        });
+
+        // Add the Bookmarks widget (wrapped in Expand, minimized by default) below the Measurement widget
+        const bookmarks = new Bookmarks({
+            view: view,
+            editingEnabled: true, // Enable editing of bookmarks
+            onAdd: function(bookmark) {
+                // Customize the bookmark before it's added
+                bookmark.name = bookmark.name || "New Bookmark";
+                bookmark.thumbnail = {
+                    url: view.takeScreenshot()
+                };
+                return bookmark;
+            }
+        });
+        const bookmarksExpand = new Expand({
+            view: view,
+            content: bookmarks,
+            expanded: false
+        });
+        view.ui.add(bookmarksExpand, {
+            position: "top-left",
+            index: 6
+        });
+
+        // Listen for expand/collapse events on the bookmarksExpand widget
+        bookmarksExpand.watch("expanded", function(isExpanded) {
+            if (isExpanded) {
+                // Call updateUI to apply translations after the widget expands
+                setTimeout(updateUI, 100);
+            }
+        });
+
+        // Add the Home widget below the Bookmarks widget
+        const homeWidget = new Home({
+            view: view
+        });
+        view.ui.add(homeWidget, {
+            position: "top-left",
+            index: 7
+        });
+
+        // Handle bookmark selection
+        bookmarks.on("select-bookmark", function(event) {
+            console.log("Bookmark selected:", event.bookmark.name);
+            // The view will automatically navigate to the bookmark's extent
+        });
+
+        // Handle bookmark editing
+        bookmarks.on("edit-bookmark", function(event) {
+            console.log("Bookmark edited:", event.bookmark.name);
+        });
+
+        // Handle bookmark deletion
+        bookmarks.on("delete-bookmark", function(event) {
+            console.log("Bookmark deleted:", event.bookmark.name);
         });
 
         //Add feature layer to map
+        const featureLayer = new FeatureLayer({
+            url: "https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1",
+            popupTemplate: {
+                title: "{ime}",
+                content: [
+                    {
+                        type: "fields",
+                        fieldInfos: [
+                            { fieldName: "OBJECTID", label: "OBJECTID" },
+                            { fieldName: "ime", label: "Назив:" },
+                            { fieldName: "adresa", label: "Адреса:" }
+                        ]
+                    }
+                ]
+            }
+        });
+        map.add(featureLayer);
 
-            const featureLayer = new FeatureLayer({
-                url: "https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1"
-            });
-            map.add(featureLayer);
-
-
-        // const query = new Query({
-        //     outFields: ["*"],
-        //     where: "1=1"
-        // });
-        // //filling in the table
-        // featureLayer.queryFeatures(query)
-        //     .then(function (response){
-        //         var resultFeatures = response.features;
-        //         console.log("result", resultFeatures);
-        //     for (var i = 0; i < resultFeatures.length; i++) {
-        //         // var feature = response.features[i];
-        //         // Check if feature and feature.attributes exist before accessing their properties
-        //         var row = "<tr><td>" + response.features[i].attributes.objectid + "</td><td>" + response.features[i].attributes.ime + "</td><td>" + response.features[i].attributes.adresa + "</td></tr>";
-        //         $("#tableBody").append(row);
-        //         // Handle click event on table rows
-        //         console.log("row",row);
-        //     }
-        // });
-
+        // Pagination configuration
         const ROWS_PER_PAGE = 10;
         let currentPage = 1;
         let totalRows = 0;
+        let allFeatures = []; // Store all features for pagination and search
 
-        function fetchPage(page){
-            const offset=(page-1)*ROWS_PER_PAGE;
+        // Function to populate the table
+        function populateTable(features, searchTerm = '') {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
 
-            const query = new Query({
-                outFields: ["*"],
-                where: "1=1",
-                resultOffset: offset,
-                resultRecordCount: ROWS_PER_PAGE
+            // Calculate which features to show for the current page
+            const startIdx = (currentPage - 1) * ROWS_PER_PAGE;
+            const endIdx = startIdx + ROWS_PER_PAGE;
+            const featuresToShow = features.slice(startIdx, endIdx);
+
+            featuresToShow.forEach(feature => {
+                const row = document.createElement('tr');
+                const name = feature.attributes.ime || '';
+                const address = feature.attributes.adresa || '';
+                const id = feature.attributes.objectid || feature.attributes.OBJECTID || feature.attributes.id || '';
+
+                // Highlight the row if the name or address contains the search term
+                if (searchTerm && (
+                    name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    address.toLowerCase().includes(searchTerm.toLowerCase())
+                )) {
+                    row.classList.add('highlight-row');
+                }
+
+                row.innerHTML = `
+                        <td>${id}</td>
+                        <td>${name}</td>
+                        <td>${address}</td>
+                    `;
+
+                // Add click handler to center map on feature
+                row.addEventListener('click', () => {
+                    if (feature.geometry) {
+                        view.goTo({
+                            target: feature.geometry,
+                            zoom: 16
+                        });
+                    }
+                });
+
+                tableBody.appendChild(row);
             });
 
-            featureLayer.queryFeatures(query).then(function (response){
-                const resultFeatures= response.features;
-
-                $("#tableBody").empty();
-
-                resultFeatures.forEach(function (feature){
-                    const row= `<tr>
-                    <td>${feature.attributes.objectId}</td>
-                    <td>${feature.attributes.ime}</td>
-                    <td>${feature.attributes.adresa}</td>
-                    </tr>`;
-                    $("#tableBody").append(row);
-                });
-            })
+            // Update pagination info
+            const totalPages = Math.ceil(features.length / ROWS_PER_PAGE);
+            document.getElementById('pageNumbers').textContent =
+                `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prevButton').disabled = currentPage === 1;
+            document.getElementById('nextButton').disabled = currentPage === totalPages;
         }
 
+        // Function to fetch and display data
+        function fetchAllFeatures() {
+            const query = new ArcGISQuery({
+                outFields: ["*"],
+                where: "1=1",
+                returnGeometry: true
+            });
 
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+
+            featureLayer.queryFeatures(query)
+                .then(response => {
+                    if (response.features && response.features.length > 0) {
+                        allFeatures = response.features;
+                        totalRows = allFeatures.length;
+                        populateTable(allFeatures, searchInput.value.trim());
+                        // Make allFeatures accessible after data is loaded
+                        window.allFeatures = allFeatures;
+                    } else {
+                        document.getElementById('tableBody').innerHTML = '<tr><td colspan="3">No data found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    document.getElementById('tableBody').innerHTML =
+                        `<tr><td colspan="3">Error loading data: ${error.message}</td></tr>`;
+                });
+        }
+
+        // Add search functionality
+        const searchInput = document.querySelector('.search-bar');
+        const searchButton = document.querySelector('.search-button');
+
+        function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) {
+                currentPage = 1;
+                populateTable(allFeatures, '');
+                return;
+            }
+
+            // Find the index of the first matching row
+            let firstMatchIdx = -1;
+            for (let i = 0; i < allFeatures.length; i++) {
+                const name = (allFeatures[i].attributes.ime || '').toLowerCase();
+                const address = (allFeatures[i].attributes.adresa || '').toLowerCase();
+                if (name.includes(searchTerm.toLowerCase()) || address.includes(searchTerm.toLowerCase())) {
+                    firstMatchIdx = i;
+                    break;
+                }
+            }
+
+            if (firstMatchIdx !== -1) {
+                // Set currentPage so the first match is visible
+                currentPage = Math.floor(firstMatchIdx / ROWS_PER_PAGE) + 1;
+                populateTable(allFeatures, searchTerm);
+            } else {
+                // No match: stay on current page, optionally show a message
+                populateTable(allFeatures, searchTerm);
+            }
+        }
+
+        searchButton.addEventListener('click', handleSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        // Pagination event listeners
+        document.getElementById('prevButton').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                populateTable(allFeatures, searchInput.value.trim());
+            }
+        });
+        document.getElementById('nextButton').addEventListener('click', () => {
+            if (currentPage < Math.ceil(allFeatures.length / ROWS_PER_PAGE)) {
+                currentPage++;
+                populateTable(allFeatures, searchInput.value.trim());
+            }
+        });
+
+        // Initial data load
+        fetchAllFeatures();
+
+        // Add sorting functionality
+        let sortDirection = {
+            id: 'asc',
+            name: 'asc'
+        };
+
+        function sortTable(column) {
+            const features = [...allFeatures];
+            sortDirection[column] = sortDirection[column] === 'asc' ? 'desc' : 'asc';
+
+            features.sort((a, b) => {
+                let valueA, valueB;
+
+                if (column === 'id') {
+                    valueA = a.attributes.objectid || a.attributes.OBJECTID || a.attributes.id || '';
+                    valueB = b.attributes.objectid || b.attributes.OBJECTID || b.attributes.id || '';
+                    // Convert to numbers for ID sorting
+                    valueA = parseInt(valueA) || 0;
+                    valueB = parseInt(valueB) || 0;
+                } else if (column === 'name') {
+                    valueA = (a.attributes.ime || '').toLowerCase();
+                    valueB = (b.attributes.ime || '').toLowerCase();
+                }
+
+                if (sortDirection[column] === 'asc') {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+
+            allFeatures = features;
+            currentPage = 1;
+            populateTable(allFeatures, searchInput.value.trim());
+        }
+
+        // Add click handlers for sort buttons
+        document.querySelectorAll('.sort-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const column = e.target.dataset.column;
+                sortTable(column);
+                // Update sort button text
+                e.target.textContent = sortDirection[column] === 'asc' ? '↑' : '↓';
+            });
+        });
+
+        // Add the Legend widget to the bottom-left corner
+        const legend = new Legend({
+            view: view
+        });
+        view.ui.add(legend, "bottom-left");
+
+        // Add a GraphicsLayer for the Sketch widget
+        const graphicsLayer = new GraphicsLayer();
+        map.add(graphicsLayer);
+
+        // Add the Sketch widget to the top-right corner
+        const sketch = new Sketch({
+            layer: graphicsLayer,
+            view: view
+        });
+        view.ui.add(sketch, {
+            position: "top-right",
+            index: 1
+        });
+
+        // Listen for sketch creation events to generate elevation profile
+        sketch.on("create", function(event) {
+            if (event.state === "complete") {
+                // Get the graphic from the sketch event
+                const graphic = event.graphic;
+                // Use the graphic to generate the elevation profile
+                elevationProfile.input = graphic;
+            }
+        });
+
+        // Add the CoordinateConversion widget under the Sketch widget in the top-right corner
+        const ccWidget = new CoordinateConversion({
+            view: view
+        });
+        view.ui.add(ccWidget, {
+            position: "top-right",
+            index: 2
+        });
+
+        // Create the Print widget
+        const print = new Print({
+            view: view,
+            printServiceUrl: "https://app.gdi.mk/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+        });
+
+        // Wrap it in an Expand widget
+        const printExpand = new Expand({
+            view: view,
+            content: print,
+            expanded: false // Minimized by default
+        });
+
+        // Add to the bottom-right corner
+        view.ui.add(printExpand, "bottom-right");
+
+        // Add the Fullscreen widget
+        const fullscreen = new Fullscreen({
+            view: view
+        });
+
+        // Add the Fullscreen widget to the bottom-right corner
+        view.ui.add(fullscreen, "bottom-right");
+
+        // Watch for fullscreen state changes to resize the view
+        fullscreen.viewModel.watch("state", function(state) {
+            if (state === "exited") {
+                // Use a small timeout to ensure the DOM is ready after exiting fullscreen
+                setTimeout(() => {
+                    const mapContainer = document.getElementById('map');
+                    if (mapContainer) {
+                        mapContainer.style.display = 'block'; // Ensure the container is visible
+                        // You might need to adjust the display property based on your layout
+                        // For example, if it was flex, set it to flex.
+
+                        // Trigger resize on the view
+                        view.resize();
+
+                        // Optional: Trigger resize on parent elements if necessary
+                        // window.dispatchEvent(new Event('resize'));
+                    }
+                }, 100);
+            }
+        });
+
+        // Add the ElevationProfile widget in the bottom-right corner, next to Print, wrapped in Expand
+        const elevationProfile = new ElevationProfile({
+            view: view,
+            profiles: [{
+                type: "ground",
+                title: "Ground Elevation"
+            }],
+            visibleElements: {
+                selectButton: true,
+                settingsButton: true,
+                sketchButton: true,
+                clearButton: true
+            }
+        });
+        const elevationProfileExpand = new Expand({
+            view: view,
+            content: elevationProfile,
+            expanded: false, // Minimized by default
+            position: "bottom-right"
+        });
+        view.ui.add(elevationProfileExpand, "bottom-right");
+
+        // Add the Locate widget to the bottom-right corner
+        const locateWidget = new Locate({
+            view: view
+        });
+        view.ui.add(locateWidget, "bottom-right");
+
+        // Translate LayerList widget elements (e.g., "Untitled layer")
+        const untitledLayerElements = document.querySelectorAll('.esri-layer-list__item-title'); // This class might vary
+        if (untitledLayerElements && translations[currentLanguage] && translations[currentLanguage]['untitledLayer']) {
+            untitledLayerElements.forEach(element => {
+                // Check if the current text is the default "Untitled layer" or a previous translation
+                // Avoid overwriting actual layer names from your service if they exist
+                const defaultEnglishText = translations['en']['untitledLayer'];
+                const macedonianText = translations['mk']['untitledLayer'];
+                const albanianText = translations['al']['untitledLayer'];
+
+                if (element.textContent === defaultEnglishText ||
+                    element.textContent === macedonianText ||
+                    element.textContent === albanianText) {
+                    element.textContent = translations[currentLanguage]['untitledLayer'];
+                }
+            });
+        }
+
+        // Translate Search widget elements
+        if (searchInput && translations[currentLanguage] && translations[currentLanguage]['searchPlaceholderText']) {
+            searchInput.placeholder = translations[currentLanguage]['searchPlaceholderText'];
+        }
+
+        const useCurrentLocationElement = document.querySelector('.esri-search__suggestion'); // This class might vary
+        if (useCurrentLocationElement && translations[currentLanguage] && translations[currentLanguage]['useCurrentLocationText']) {
+            // Check if the text is the default before overwriting
+            const defaultEnglishText = translations['en']['useCurrentLocationText'];
+            const macedonianText = translations['mk']['useCurrentLocationText'];
+            const albanianText = translations['al']['useCurrentLocationText'];
+
+            if (useCurrentLocationElement.textContent.includes(defaultEnglishText) ||
+                useCurrentLocationElement.textContent.includes(macedonianText) ||
+                useCurrentLocationElement.textContent.includes(albanianText)) {
+
+                // Preserve any icon if present
+                const icon = useCurrentLocationElement.querySelector('*'); // Assuming the icon is a child element
+
+                useCurrentLocationElement.textContent = translations[currentLanguage]['useCurrentLocationText'];
+
+                if (icon) {
+                    useCurrentLocationElement.insertBefore(icon, useCurrentLocationElement.firstChild);
+                }
+            }
+        }
+
+        // Translate Bookmarks widget elements
+        const noBookmarksElement = document.querySelector('.esri-bookmarks__no-bookmarks-message'); // Class might vary
+        if (noBookmarksElement && translations[currentLanguage] && translations[currentLanguage]['noBookmarksText']) {
+            noBookmarksElement.textContent = translations[currentLanguage]['noBookmarksText'];
+        }
+
+        const addBookmarksHintElement = document.querySelector('.esri-bookmarks__no-bookmarks-text'); // Class might vary
+        if (addBookmarksHintElement && translations[currentLanguage] && translations[currentLanguage]['addBookmarksHintText']) {
+            addBookmarksHintElement.textContent = translations[currentLanguage]['addBookmarksHintText'];
+        }
+
+        const addBookmarksButton = document.querySelector('.esri-bookmarks__container .esri-button'); // Class might vary
+        if (addBookmarksButton && translations[currentLanguage] && translations[currentLanguage]['addBookmarkButtonText']) {
+            // Check if the text is the default before overwriting
+            const defaultEnglishText = translations['en']['addBookmarkButtonText'];
+            const macedonianText = translations['mk']['addBookmarkButtonText'];
+            const albanianText = translations['al']['addBookmarkButtonText'];
+
+            if (addBookmarksButton.textContent.includes(defaultEnglishText) ||
+                addBookmarksButton.textContent.includes(macedonianText) ||
+                addBookmarksButton.textContent.includes(albanianText)) {
+
+                // Preserve any icon if present
+                const icon = addBookmarksButton.querySelector('*'); // Assuming the icon is a child element
+
+                addBookmarksButton.textContent = translations[currentLanguage]['addBookmarkButtonText'];
+
+                if (icon) {
+                    addBookmarksButton.insertBefore(icon, addBookmarksButton.firstChild);
+                }
+            }
+        }
+
+        view.when(function() {
+            setTimeout(function() {
+                window.dispatchEvent(new Event('resize'));
+            }, 500);
+        });
     });
 
-   </script>
+    // PDF Export (all rows, Unicode support)
+    document.getElementById('exportPDF').addEventListener('click', function () {
+        if (!window.allFeatures || window.allFeatures.length === 0) {
+            alert('No data available to export. Please wait for the data to load.');
+            return;
+        }
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Prepare all data
+            const rows = window.allFeatures.map(feature => [
+                feature.attributes.objectid || feature.attributes.OBJECTID || feature.attributes.id || '',
+                feature.attributes.ime || '',
+                feature.attributes.adresa || ''
+            ]);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(14);
+            doc.text('BetSpot Table Export', 10, 15);
+
+            doc.autoTable({
+                head: [['ID', 'Name', 'Address']],
+                body: rows,
+                startY: 25,
+                styles: { font: 'helvetica', fontStyle: 'normal' }
+            });
+
+            doc.save('betspot-table.pdf');
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Error generating PDF. Please try again.');
+        }
+    });
+
+    // Excel Export (all rows)
+    document.getElementById('exportExcel').addEventListener('click', function () {
+        if (!window.allFeatures || window.allFeatures.length === 0) {
+            alert('No data available to export. Please wait for the data to load.');
+            return;
+        }
+
+        try {
+            const wb = XLSX.utils.book_new();
+            const ws_data = [];
+            ws_data.push(['ID', 'Name', 'Address']);
+
+            window.allFeatures.forEach(feature => {
+                ws_data.push([
+                    feature.attributes.objectid || feature.attributes.OBJECTID || feature.attributes.id || '',
+                    feature.attributes.ime || '',
+                    feature.attributes.adresa || ''
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, 'BetSpot');
+            XLSX.writeFile(wb, 'betspot-table.xlsx');
+        } catch (error) {
+            console.error('Error generating Excel:', error);
+            alert('Error generating Excel file. Please try again.');
+        }
+    });
+
+    // Gallery functionality
+    const galleryImages = [
+        'Gallery/images-2.jpeg',
+        'Gallery/images.jpeg',
+        'Gallery/kladilnica.jpg',
+        'Gallery/vo_klad.jpg'
+    ];
+    let currentImageIndex = 0;
+
+    // Gallery button click handler
+    document.querySelector('.gallery-button').addEventListener('click', function() {
+        if (galleryImages.length === 0) {
+            alert('No images available in the gallery.');
+            return;
+        }
+        const popup = document.getElementById('galleryPopup');
+        popup.classList.remove('hidden');
+        popup.classList.add('show');
+        showCurrentImage();
+    });
+
+    // Close button click handler
+    document.getElementById('closePopup').addEventListener('click', function() {
+        const popup = document.getElementById('galleryPopup');
+        popup.classList.remove('show');
+        popup.classList.add('hidden');
+    });
+
+    // Previous button click handler
+    document.getElementById('prevPhoto').addEventListener('click', function() {
+        currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+        showCurrentImage();
+    });
+
+    // Next button click handler
+    document.getElementById('nextPhoto').addEventListener('click', function() {
+        currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+        showCurrentImage();
+    });
+
+    // Function to show current image
+    function showCurrentImage() {
+        const galleryContainer = document.getElementById('photoGallery');
+        galleryContainer.innerHTML = `<img src="${galleryImages[currentImageIndex]}" alt="Gallery Image">`;
+    }
+
+    // Close popup when clicking outside the content
+    document.getElementById('galleryPopup').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('show');
+            this.classList.add('hidden');
+        }
+    });
+
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        const popup = document.getElementById('galleryPopup');
+        if (!popup.classList.contains('show')) return;
+
+        switch(e.key) {
+            case 'ArrowLeft':
+                document.getElementById('prevPhoto').click();
+                break;
+            case 'ArrowRight':
+                document.getElementById('nextPhoto').click();
+                break;
+            case 'Escape':
+                document.getElementById('closePopup').click();
+                break;
+        }
+    });
+
+</script>
 
 </body>
 </html>
