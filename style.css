@@ -244,6 +244,7 @@ footer {
     display: flex;
     justify-content: flex-end;
     margin-top: 10px;
+    margin-bottom: 15px;
     gap: 15px;
     margin-right: 15px;
 }
@@ -372,4 +373,56 @@ main {
 html, body {
     height: 100%;
     min-height: 100vh;
+}
+
+/* Measurement widget button styling */
+.esri-measurement .custom-measure-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+}
+
+.esri-measurement .custom-measure-buttons div:first-child {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.esri-measurement .custom-measure-buttons button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: auto;
+    min-width: 120px;
+    max-width: 200px;
+    min-height: 35px;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    color: #333;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.esri-measurement .custom-measure-buttons button:hover {
+    background-color: #e8e8e8;
+    border-color: #999;
+}
+
+.esri-measurement .custom-measure-buttons button:active {
+    background-color: #d8d8d8;
+}
+
+/* Ensure icons and text are properly spaced */
+.esri-measurement .custom-measure-buttons button::before {
+    margin-right: 8px;
+    font-size: 16px;
 }

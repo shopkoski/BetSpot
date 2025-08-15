@@ -9,6 +9,8 @@
     <script src="language-switch.js"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/jspdf-autotable@latest/dist/jspdf.plugin.autotable.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://js.arcgis.com/4.30/"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -157,9 +159,15 @@
     ], function(Map, MapView, Graphic, FeatureLayer, webMercatorUtils, ArcGISQuery, Search, Expand, BasemapGallery, LayerList, Measurement, Bookmarks, Home, Fullscreen, Legend, Sketch, GraphicsLayer, CoordinateConversion, Print, ElevationProfile, Locate, esriConfig) {
         // Set locale from localStorage or default to 'en'
         var lang = localStorage.getItem('selectedLanguage') || 'en';
-        // Map 'al' (used in your UI) to 'sq' (ArcGIS locale for Albanian)
-        if (lang === 'al') lang = 'sq';
-        esriConfig.locale = lang;
+        // Map our language codes to ArcGIS locale codes
+        const localeMap = {
+            'en': 'en',
+            'mk': 'mk', // Macedonian
+            'al': 'sq'  // Albanian (ArcGIS uses 'sq' for Albanian)
+        };
+        var arcGISLocale = localeMap[lang] || 'en';
+        esriConfig.locale = arcGISLocale;
+        console.log("ArcGIS locale set to:", arcGISLocale);
 
         // Configuration
         const map = new Map({
@@ -174,19 +182,92 @@
             zoom: 13.5// Set closer zoom so feature layer is visible right away
         });
 
-        // Add the Search widget
-        const searchWidget = new Search({
+        // Make map and view globally accessible for widget recreation
+        window.map = map;
+        window.view = view;
+        
+        // Initialize global widgets object
+        window.widgets = {};
+
+        // Assume translations and currentLanguage are available globally
+        const homeWidget = new Home({
             view: view
         });
-        const searchExpand = new Expand({
-            view: view,
-            content: searchWidget,
-            expanded: false // Minimized by default
-        });
-        view.ui.add(searchExpand, {
+        view.ui.add(homeWidget, {
             position: "top-left",
             index: 2
         });
+
+        // --- Basemap Gallery ---
+        const basemapGallery = new BasemapGallery({ view });
+        const basemapExpand = new Expand({
+            view,
+            content: basemapGallery,
+            expanded: false,
+            expandTooltip: translations[currentLanguage]['basemapTooltip'] || 'Basemap',
+            expandIconClass: "esri-icon-basemap"
+        });
+        view.ui.add(basemapExpand, { position: "top-left", index: 3 });
+
+        // --- Layer List ---
+        const layerList = new LayerList({ view });
+        const layerListExpand = new Expand({
+            view,
+            content: layerList,
+            expanded: false,
+            expandTooltip: translations[currentLanguage]['layerListTooltip'] || 'Layer list',
+            expandIconClass: "esri-icon-layers"
+        });
+        view.ui.add(layerListExpand, { position: "top-left", index: 4 });
+
+        // --- Measurement ---
+        const measurement = new Measurement({ view });
+        const measurementExpand = new Expand({
+            view,
+            content: measurement,
+            expanded: false,
+            expandTooltip: translations[currentLanguage]['measurementTooltip'] || 'Measure',
+            expandIconClass: "esri-icon-measure"
+        });
+        view.ui.add(measurementExpand, { position: "top-left", index: 5 });
+
+        // --- Bookmarks ---
+        const bookmarks = new Bookmarks({ view, editingEnabled: true });
+        const bookmarksExpand = new Expand({
+            view,
+            content: bookmarks,
+            expanded: false,
+            expandTooltip: translations[currentLanguage]['bookmarksTooltip'] || 'Bookmarks',
+            expandIconClass: "esri-icon-bookmark"
+        });
+        view.ui.add(bookmarksExpand, { position: "top-left", index: 6 });
+        // --- Search ---
+        const searchWidget = new Search({ view });
+        const searchExpand = new Expand({
+            view,
+            content: searchWidget,
+            expanded: false,
+            expandTooltip: translations[currentLanguage]['searchTooltip'] || 'Search',
+            expandIconClass: "esri-icon-search"
+        });
+        view.ui.add(searchExpand, { position: "top-left", index: 7 });
+
+
+        // Create the Print widget
+        const print = new Print({
+            view: view,
+            printServiceUrl: "https://app.gdi.mk/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+        });
+
+        // Wrap it in an Expand widget
+        const printExpand = new Expand({
+            view: view,
+            content: print,
+            expanded: false, // Minimized by default
+            expandTooltip: translations[currentLanguage]['printTooltip'] || 'Print',
+            expandIconClass: "esri-icon-printer"
+        });
+        view.ui.add(printExpand, "bottom-right");
 
         // Listen for expand/collapse events on the searchExpand widget
         searchExpand.watch("expanded", function(isExpanded) {
@@ -194,48 +275,6 @@
                 // Call updateUI to apply translations after the widget expands
                 setTimeout(updateUI, 100);
             }
-        });
-
-        // Add the BasemapGallery widget (wrapped in Expand, minimized by default) below the Search widget
-        const basemapGallery = new BasemapGallery({
-            view: view
-        });
-        const basemapExpand = new Expand({
-            view: view,
-            content: basemapGallery,
-            expanded: false // Minimized by default
-        });
-        view.ui.add(basemapExpand, {
-            position: "top-left",
-            index: 3
-        });
-
-        // Add the LayerList widget (wrapped in Expand, minimized by default) below the BasemapGallery widget
-        const layerList = new LayerList({
-            view: view
-        });
-        const layerListExpand = new Expand({
-            view: view,
-            content: layerList,
-            expanded: false // Minimized by default
-        });
-        view.ui.add(layerListExpand, {
-            position: "top-left",
-            index: 4
-        });
-
-        // Add the Measurement widget (wrapped in Expand, minimized by default) below the LayerList widget
-        const measurement = new Measurement({
-            view: view
-        });
-        const measurementExpand = new Expand({
-            view: view,
-            content: measurement,
-            expanded: false
-        });
-        view.ui.add(measurementExpand, {
-            position: "top-left",
-            index: 5
         });
 
         // Listen for expand/collapse events on the measurementExpand widget
@@ -316,29 +355,6 @@
             }
         });
 
-        // Add the Bookmarks widget (wrapped in Expand, minimized by default) below the Measurement widget
-        const bookmarks = new Bookmarks({
-            view: view,
-            editingEnabled: true, // Enable editing of bookmarks
-            onAdd: function(bookmark) {
-                // Customize the bookmark before it's added
-                bookmark.name = bookmark.name || "New Bookmark";
-                bookmark.thumbnail = {
-                    url: view.takeScreenshot()
-                };
-                return bookmark;
-            }
-        });
-        const bookmarksExpand = new Expand({
-            view: view,
-            content: bookmarks,
-            expanded: false
-        });
-        view.ui.add(bookmarksExpand, {
-            position: "top-left",
-            index: 6
-        });
-
         // Listen for expand/collapse events on the bookmarksExpand widget
         bookmarksExpand.watch("expanded", function(isExpanded) {
             if (isExpanded) {
@@ -348,13 +364,7 @@
         });
 
         // Add the Home widget below the Bookmarks widget
-        const homeWidget = new Home({
-            view: view
-        });
-        view.ui.add(homeWidget, {
-            position: "top-left",
-            index: 7
-        });
+
 
         // Handle bookmark selection
         bookmarks.on("select-bookmark", function(event) {
@@ -411,7 +421,7 @@
                 const row = document.createElement('tr');
                 const name = feature.attributes.ime || '';
                 const address = feature.attributes.adresa || '';
-                const id = feature.attributes.objectid || feature.attributes.OBJECTID || feature.attributes.id || '';
+                const id = feature.attributes.objectid || feature.attributes.OBJECTID || feature.attributes.id || '' ;
 
                 // Highlight the row if the name or address contains the search term
                 if (searchTerm && (
@@ -454,6 +464,7 @@
                 outFields: ["*"],
                 where: "1=1",
                 returnGeometry: true
+
             });
 
             document.getElementById('tableBody').innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
@@ -619,22 +630,6 @@
             index: 2
         });
 
-        // Create the Print widget
-        const print = new Print({
-            view: view,
-            printServiceUrl: "https://app.gdi.mk/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
-        });
-
-        // Wrap it in an Expand widget
-        const printExpand = new Expand({
-            view: view,
-            content: print,
-            expanded: false // Minimized by default
-        });
-
-        // Add to the bottom-right corner
-        view.ui.add(printExpand, "bottom-right");
-
         // Add the Fullscreen widget
         const fullscreen = new Fullscreen({
             view: view
@@ -679,10 +674,11 @@
             }
         });
         const elevationProfileExpand = new Expand({
-            view: view,
+            view,
             content: elevationProfile,
             expanded: false, // Minimized by default
-            position: "bottom-right"
+            expandTooltip: translations[currentLanguage]['elevationTooltip'] || 'Elevation profile',
+            expandIconClass: "esri-icon-elevation-profile"
         });
         view.ui.add(elevationProfileExpand, "bottom-right");
 
@@ -775,6 +771,38 @@
                 window.dispatchEvent(new Event('resize'));
             }, 500);
         });
+
+        function translateArcGISTooltips() {
+            // Get current language and translations
+            const lang = localStorage.getItem('selectedLanguage') || 'en';
+            const t = translations[lang] || translations['en'];
+
+            // Map widget CSS selectors to translation keys
+            const tooltipMap = [
+                { selector: '.esri-search', key: 'searchTooltip' },
+                { selector: '.esri-home', key: 'homeTooltip' },
+                { selector: '.esri-zoom-in', key: 'zoomInTooltip' },
+                { selector: '.esri-zoom-out', key: 'zoomOutTooltip' },
+                { selector: '.esri-layer-list', key: 'layerListTooltip' },
+                { selector: '.esri-bookmarks', key: 'bookmarksTooltip' },
+                { selector: '.esri-basemap-gallery', key: 'basemapTooltip' },
+                { selector: '.esri-fullscreen', key: 'fullscreenTooltip' },
+                { selector: '.esri-print', key: 'printTooltip' },
+                { selector: '.esri-measurement', key: 'measurementTooltip' }
+            ];
+
+            tooltipMap.forEach(item => {
+                document.querySelectorAll(item.selector).forEach(el => {
+                    if (t[item.key]) {
+                        el.setAttribute('title', t[item.key]);
+                        el.setAttribute('aria-label', t[item.key]);
+                    }
+                });
+            });
+        }
+
+        // Call after widgets are rendered and on language switch
+        setTimeout(translateArcGISTooltips, 1000);
     });
 
     // PDF Export (all rows, Unicode support)
@@ -784,32 +812,162 @@
             return;
         }
 
+        // Check if pdfmake is available
+        if (typeof pdfMake === 'undefined') {
+            alert('PDF generation library not loaded. Please refresh the page and try again.');
+            return;
+        }
+
         try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            // Use pdfmake for better Unicode support
+            const docDefinition = {
+                pageSize: 'A4',
+                pageOrientation: 'portrait',
+                pageMargins: [40, 60, 40, 60],
+                header: {
+                    text: 'BetSpot Table Export',
+                    alignment: 'center',
+                    margin: [0, 20, 0, 0],
+                    fontSize: 18,
+                    bold: true
+                },
+                footer: function(currentPage, pageCount) {
+                    return {
+                        text: 'Page ' + currentPage + ' of ' + pageCount,
+                        alignment: 'center',
+                        margin: [0, 0, 0, 20],
+                        fontSize: 10
+                    };
+                },
+                content: [
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: ['15%', '25%', '60%'],
+                            body: [
+                                // Header row
+                                [
+                                    { text: 'ID', style: 'tableHeader' },
+                                    { text: 'Name', style: 'tableHeader' },
+                                    { text: 'Address', style: 'tableHeader' }
+                                ],
+                                // Data rows - use the same simple approach as Excel
+                                ...window.allFeatures.map(feature => [
+                                    feature.attributes.objectid || feature.attributes.OBJECTID || feature.attributes.id || '',
+                                    feature.attributes.ime || '',
+                                    feature.attributes.adresa || ''
+                                ])
+                            ]
+                        },
+                        layout: {
+                            fillColor: function (rowIndex, node, columnIndex) {
+                                return (rowIndex === 0) ? '#2980b9' : null;
+                            },
+                            hLineWidth: function (i, node) {
+                                return (i === 0 || i === node.table.body.length) ? 2 : 1;
+                            },
+                            vLineWidth: function (i, node) {
+                                return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+                            },
+                            hLineColor: function (i, node) {
+                                return (i === 0 || i === node.table.body.length) ? 'black' : 'gray';
+                            },
+                            vLineColor: function (i, node) {
+                                return (i === 0 || i === node.table.widths.length) ? 'black' : 'gray';
+                            }
+                        }
+                    }
+                ],
+                styles: {
+                    tableHeader: {
+                        bold: true,
+                        fontSize: 12,
+                        color: 'white',
+                        alignment: 'center',
+                        margin: [0, 5, 0, 5]
+                    }
+                },
+                defaultStyle: {
+                    fontSize: 10,
+                    margin: [0, 3, 0, 3]
+                }
+            };
 
-            // Prepare all data
-            const rows = window.allFeatures.map(feature => [
-                feature.attributes.objectid || feature.attributes.OBJECTID || feature.attributes.id || '',
-                feature.attributes.ime || '',
-                feature.attributes.adresa || ''
-            ]);
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(14);
-            doc.text('BetSpot Table Export', 10, 15);
-
-            doc.autoTable({
-                head: [['ID', 'Name', 'Address']],
-                body: rows,
-                startY: 25,
-                styles: { font: 'helvetica', fontStyle: 'normal' }
+            // Generate and download the PDF with better error handling
+            pdfMake.createPdf(docDefinition).download('betspot-table.pdf').catch(function(error) {
+                console.error('PDF download error:', error);
+                alert('Error downloading PDF. Please try again or use Excel export instead.');
             });
-
-            doc.save('betspot-table.pdf');
         } catch (error) {
             console.error('Error generating PDF:', error);
-            alert('Error generating PDF. Please try again.');
+
+            // Fallback to original jsPDF method
+            try {
+                console.log('Trying fallback PDF method...');
+                const { jsPDF } = window.jspdf;
+
+                if (typeof jsPDF === 'undefined') {
+                    alert('PDF generation failed. Please try Excel export instead.');
+                    return;
+                }
+
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4',
+                    putOnlyUsedFonts: true,
+                    compress: true
+                });
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(16);
+
+                const title = 'BetSpot Table Export';
+                doc.text(title, 105, 20, { align: 'center' });
+
+                const rows = window.allFeatures.map(feature => {
+                    const id = String(feature.attributes.objectid || feature.attributes.OBJECTID || feature.attributes.id || '');
+                    const name = String(feature.attributes.ime || '').trim();
+                    const address = String(feature.attributes.adresa || '').trim();
+                    return [id, name, address];
+                });
+
+                doc.autoTable({
+                    head: [['ID', 'Name', 'Address']],
+                    body: rows,
+                    startY: 30,
+                    styles: {
+                        font: 'helvetica',
+                        fontStyle: 'normal',
+                        fontSize: 9,
+                        cellPadding: 4,
+                        overflow: 'linebreak',
+                        halign: 'left'
+                    },
+                    headStyles: {
+                        fillColor: [41, 128, 185],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        fontSize: 10
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 25, halign: 'center' },
+                        1: { cellWidth: 55, halign: 'left' },
+                        2: { cellWidth: 110, halign: 'left' }
+                    },
+                    didDrawPage: function (data) {
+                        const pageCount = doc.internal.getNumberOfPages();
+                        doc.setFontSize(8);
+                        doc.text('Page ' + data.pageNumber + ' of ' + pageCount, 105, doc.internal.pageSize.height - 10, { align: 'center' });
+                    }
+                });
+
+                doc.save('betspot-table.pdf');
+                console.log('Fallback PDF method successful');
+            } catch (fallbackError) {
+                console.error('Fallback PDF method also failed:', fallbackError);
+                alert('PDF generation failed. Please try Excel export instead.');
+            }
         }
     });
 
