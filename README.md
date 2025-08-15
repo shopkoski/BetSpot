@@ -1,2 +1,2 @@
 # BetSpot
-internship
+https://shopkoski.github.io/BetSpot/
